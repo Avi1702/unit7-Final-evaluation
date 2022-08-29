@@ -13,6 +13,7 @@ const app=express()
 app.use(express.json())
 
 const SECRET_KEY="abcd1234"
+
 const Register_schema=mongoose.Schema({
 
     name:{
@@ -32,7 +33,27 @@ const Register_schema=mongoose.Schema({
     verifyEmailOtp:Number
 })
 
+const Todo_schema=mongoose.Schema({
+
+    task:{
+        type:String,
+        require:true
+    },
+    status:{
+        type:Boolean,
+        require:true,
+        
+    },
+    tag:{
+        type:String,
+        require:true
+    }
+  
+})
+
+
 const Users=new mongoose.model("User",Register_schema)
+const Todos=new mongoose.model("Todo",Todo_schema)
 
 const Register=async ()=>{
 const connect=await mongoose.connect("mongodb://localhost:27017/Registration")
@@ -90,6 +111,38 @@ app.get("/userLoggedIn",(req,res)=>{
     let token=req.headers['auth-token']
     console.log(token)
     res.send(token)
+})
+
+app.post("/todo",async (req,res)=>{
+
+console.log("hi")
+    let {task,status,tag}=req.body
+     console.log(req.body)
+
+    const todo=await new Todos({
+        id:
+        task,
+        status,
+        tag
+      })
+
+      await todo.save()
+  
+res.send("todo added successfully")
+
+})
+
+app.get("/todos",async(req,res)=>{
+    let todos=await Todos.find()
+    console.log(todos)
+    res.send("List of todos")
+})
+
+app.patch("/todo/:task",async(req,res)=>{
+    let {task}=req.params
+   
+    let todo=await Todos.findOneAndUpdate({task,status:!task.status})
+    res.send("updated")
 })
 
 
